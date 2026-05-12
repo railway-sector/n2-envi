@@ -165,7 +165,6 @@ const prowRenderer = new SimpleRenderer({
 
 export const prowLayer = new FeatureLayer({
   url: "https://gis.railway-sector.com/server/rest/services/N2_Alignment/FeatureServer/1",
-  layerId: 1,
   title: "PROW",
   popupEnabled: false,
   renderer: prowRenderer,
@@ -221,7 +220,7 @@ export const stationLayer = new FeatureLayer({
     },
   },
   layerId: 2,
-  title: "N2 Stations",
+  title: "SC Stations",
   labelingInfo: [labelClass],
   elevationInfo: {
     mode: "relative-to-ground",
@@ -273,7 +272,7 @@ const monitorStatusSymbolRenderer = new UniqueValueRenderer({
       symbol: getUniqueValueSymbol(
         "https://EijiGorilla.github.io/Symbols/No_Data_textLogo.png",
         "#D13470",
-        30,
+        20,
       ),
     },
     {
@@ -282,7 +281,7 @@ const monitorStatusSymbolRenderer = new UniqueValueRenderer({
       symbol: getUniqueValueSymbol(
         "https://EijiGorilla.github.io/Symbols/DemolishComplete_v2.png",
         "#D13470",
-        30,
+        20,
       ),
     },
     {
@@ -291,7 +290,7 @@ const monitorStatusSymbolRenderer = new UniqueValueRenderer({
       symbol: getUniqueValueSymbol(
         "https://EijiGorilla.github.io/Symbols/3D_Web_Style/Warning_Symbol.svg",
         "#D13470",
-        30,
+        20,
       ),
     },
   ],
@@ -332,7 +331,7 @@ export const monitorPointLayer = new FeatureLayer({
     unit: "meters",
     //offset: 0
   },
-  // outFields: ['*'],
+  outFields: ["*"],
   renderer: monitorStatusSymbolRenderer,
   labelingInfo: [MonitorLabel],
   popupTemplate: {

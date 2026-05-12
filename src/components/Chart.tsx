@@ -44,7 +44,7 @@ const Chart = () => {
       chartCategoryTypes: monitoringTypes,
       chartCategoryField: chartCategoryField,
       chartCategoryValueType: "number",
-      statusState: [2, 3],
+      statusState: [1, 2, 3],
       statusField: statusField,
     }).then((result: any) => {
       setChartData(result[0]);
