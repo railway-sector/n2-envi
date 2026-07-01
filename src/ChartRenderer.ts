@@ -87,6 +87,7 @@ interface clickSeriesType {
   chartCategoryTypes: any;
   chartCategoryFieldScene: any;
   statusStatename: any;
+  statusArray: any;
   statusField: any;
   arcgisScene: any;
 }
@@ -97,6 +98,7 @@ export function clickSeries({
   chartCategoryTypes,
   chartCategoryFieldScene,
   statusStatename,
+  statusArray,
   statusField,
   arcgisScene,
 }: clickSeriesType) {
@@ -107,13 +109,13 @@ export function clickSeries({
       (emp: any) => emp.category === categorySelected,
     );
     const typeSelected = find?.value;
-    queryc.qValues = [undefined];
-    queryc.qFields = [undefined];
+
     queryc.chartCategory = typeSelected;
     queryc.chartCategoryField = chartCategoryFieldScene;
     queryc.chartCategoryType = "number";
-    queryc.status =
-      statusStatename === "nodata" ? 1 : statusStatename === "normal" ? 2 : 3;
+    queryc.status = statusArray.find(
+      (item: any) => item.status === statusStatename,
+    ).value;
     queryc.statusField = statusField;
 
     for (const layer of layers) {
@@ -142,6 +144,7 @@ interface makeSeriesType {
   data: any;
   statusTypename: any;
   statusStatename?: any;
+  statusArray: any;
   statusField: any;
   xAxis: any;
   yAxis: any;
@@ -162,6 +165,7 @@ export function makeSeries({
   data,
   statusTypename,
   statusStatename,
+  statusArray,
   statusField,
   xAxis,
   yAxis,
@@ -227,6 +231,7 @@ export function makeSeries({
     chartCategoryTypes: chartCategoryTypes,
     chartCategoryFieldScene: chartCategoryFieldScene,
     statusStatename: statusStatename,
+    statusArray: statusArray,
     statusField: statusField,
     arcgisScene: arcgisScene,
   });
@@ -252,7 +257,7 @@ interface chartType {
   // 'statusTypename' and 'statusStatename': E.g., you can add or delete status you wish to add in stacked columns.
   statusTypename: StatusTypenamesType[]; // order has no effect on statistics
   statusStatename: StatusStateType[]; // order affects the order displayed in stacked column charts
-  statusStateValue?: any;
+  statusArray: any;
   statusField: any;
   seriesStatusColor: any;
   strokeColor: any;
@@ -276,6 +281,7 @@ export function chartRenderer({
   chartCategoryFieldScene,
   statusTypename,
   statusStatename,
+  statusArray,
   statusField,
   seriesStatusColor,
   strokeColor,
@@ -375,6 +381,7 @@ export function chartRenderer({
         data: data,
         statusTypename: statustype,
         statusStatename: statusStatename[index],
+        statusArray: statusArray,
         statusField: statusField,
         xAxis: xAxis,
         yAxis: yAxis,

@@ -35,9 +35,19 @@ export const monitoringTypes = monitoringCategoryLabels.map(
       category: label,
       value: monitoringStatusValues[index],
       icon: icons[index],
+      color: monitoringStatusColor[index],
     });
   },
 );
+
+export const statusLabels = ["nodata", "normal", "exceeded"];
+export const statusValues = [1, 2, 3];
+export const statusArray = statusLabels.map((status: any, index: any) => {
+  return Object.assign({
+    status: status,
+    value: statusValues[index],
+  });
+});
 
 // Layter list
 export async function defineActions(event: any) {
