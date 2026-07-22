@@ -1,22 +1,21 @@
 /* eslint-disable @typescript-eslint/no-unused-expressions */
 import { useEffect, useRef, useState } from "react";
-import { chartstack, monitorPointLayer } from "../layers";
+import { monitorPointLayer } from "../layers";
 import * as am5 from "@amcharts/amcharts5";
 import * as am5xy from "@amcharts/amcharts5/xy";
-import { thousands_separators } from "../query";
-import { ArcgisScene } from "@arcgis/map-components/dist/components/arcgis-scene";
 import {
-  chartCategoryField,
-  icons,
-  monitoringStatusColor,
-  monitoringTypes,
-  statusArray,
-  statusField,
-} from "../uniqueValues";
-import { chartRenderer } from "../chartRenderer";
+  makeQuery,
+  stackColumnChartData,
+  stackColumnChartRender,
+  thousands_separators,
+} from "../query";
+import { ArcgisScene } from "@arcgis/map-components/dist/components/arcgis-scene";
+import { status_f, status_q, type_f, types_q } from "../uniqueValues";
 import { useQuery } from "@tanstack/react-query";
 import { legendSetter, rootSetter } from "../chartSetter";
 import type { ChartResponse } from "../interfaceKeys";
+import ChartStackColumnRender from "chart-stack-column-render";
+import ChartStackColumns from "chart-stack-column";
 
 const Chart = () => {
   const [chartPanelwidth, setChartPanelwidth] = useState<any>();
@@ -25,33 +24,32 @@ const Chart = () => {
   const chartRef = useRef<unknown | any | undefined>({});
   const chartID = "monitoring-bar";
 
+  const queryc = makeQuery([undefined], [undefined]);
+
   const { data } = useQuery<ChartResponse | any>({
-    queryKey: [
-      statusField,
-      monitorPointLayer,
-      chartCategoryField,
-      monitoringTypes,
-    ],
+    queryKey: [status_f, monitorPointLayer, type_f, types_q],
     queryFn: async () => {
-      chartstack.categoryTypeField = chartCategoryField;
-      chartstack.categoryTypes = monitoringTypes;
-      chartstack.layers = [monitorPointLayer];
-      chartstack.statusState = [1, 2, 3, 4];
-      chartstack.statusField = statusField;
-      chartstack.layers = [monitorPointLayer];
-      chartstack.qChart = undefined;
-      const chartData = await chartstack.chartDataStackColumns();
+      //--- chart data
+      const chartData = await stackColumnChartData({
+        colchart: new ChartStackColumns(),
+        qChart: queryc,
+        categoryTypes: types_q,
+        categoryTypeField: type_f,
+        layers: [monitorPointLayer],
+        statusField: status_f,
+        statusState: [1, 2, 3, 4],
+      });
 
       let totale = 0;
       const arr = chartData[0].map(
-        (item: any, index: any) => (
+        (item: any) => (
           (totale += item.delayed),
           {
             category: item.category,
             exceeded: item.delayed,
             normal: item.ongoing,
             nodata: item.incomp,
-            icon: icons[index],
+            icon: item.icon,
           }
         ),
       );
@@ -92,7 +90,6 @@ const Chart = () => {
 
   useEffect(() => {
     const root = rootSetter({ chartID: chartID });
-
     const chart = root.container.children.push(
       am5xy.XYChart.new(root, {
         panX: false,
@@ -124,26 +121,32 @@ const Chart = () => {
     });
     legendRef.current = legend;
 
-    chartRenderer({
-      root: root,
-      chart: chart,
-      data: chartData,
+    //--- chart renderer
+    stackColumnChartRender({
+      render: new ChartStackColumnRender(),
+      revit: false,
       layers: [monitorPointLayer],
-      chartCategoryTypes: monitoringTypes,
-      chartCategoryFieldScene: chartCategoryField,
+      root,
+      chart,
+      data: chartData,
+      buildingLayer: undefined,
+      qChart: queryc,
+      chartCategoryTypes: types_q,
+      chartCategoryTypeField: type_f,
       statusTypename: ["Exceeded", "Normal"],
       statusStatename: ["exceeded", "normal"],
-      statusArray: statusArray,
-      statusField: statusField,
-      seriesStatusColor: monitoringStatusColor,
+      statusArray: status_q,
+      statusField: status_f,
+      seriesStatusColor: status_q.map((c: any) => c.color),
       strokeColor: chartBorderLineColor,
       strokeWidth: chartBorderLineWidth,
-      arcgisScene: arcgisScene,
-      new_chartIconSize: new_chartIconSize,
-      new_axisFontSize: new_axisFontSize,
-      chartIconPositionX: chartIconPositionX,
-      chartPaddingRightIconLabel: chartPaddingRightIconLabel,
-      legend: legend,
+      view: arcgisScene?.view,
+      setLayerViewFilter: undefined,
+      new_chartIconSize,
+      new_axisFontSize,
+      chartIconPositionX,
+      chartPaddingRightIconLabel,
+      legend,
       updateChartPanelwidth: setChartPanelwidth,
     });
 

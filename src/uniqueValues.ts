@@ -1,25 +1,138 @@
-export const primaryLabelColor = "#d1d5db";
+import LabelClass from "@arcgis/core/layers/support/LabelClass";
+import SimpleRenderer from "@arcgis/core/renderers/SimpleRenderer";
+import UniqueValueRenderer from "@arcgis/core/renderers/UniqueValueRenderer";
+import LineCallout3D from "@arcgis/core/symbols/callouts/LineCallout3D";
+import IconSymbol3DLayer from "@arcgis/core/symbols/IconSymbol3DLayer";
+import LabelSymbol3D from "@arcgis/core/symbols/LabelSymbol3D";
+import PointSymbol3D from "@arcgis/core/symbols/PointSymbol3D";
+import SimpleFillSymbol from "@arcgis/core/symbols/SimpleFillSymbol";
+import SimpleLineSymbol from "@arcgis/core/symbols/SimpleLineSymbol";
+import SimpleMarkerSymbol from "@arcgis/core/symbols/SimpleMarkerSymbol";
+import TextSymbol3DLayer from "@arcgis/core/symbols/TextSymbol3DLayer";
+
+//----------------------------------------------//
+//              portalItem                      //
+//----------------------------------------------//
+const portalItem_url = { url: "https://gis.railway-sector.com/portal" };
+
+export const portalItems = (id: any) => {
+  return { id: id, portal: portalItem_url };
+};
+
+//----------------------------------------------//
+//              Chart Parameters                //
+//----------------------------------------------//
+export const chart_width = "26vw";
+export const chart_box_width = 250;
+
+// Chart and chart label color
+export const primaryLabelColor = "#9ca3af";
 export const valueLabelColor = "#d1d5db";
 
-export const chartCategoryField = "Type";
-export const statusField = "Status";
+export const type_f = "Type";
+export const status_f = "Status";
 
-//------
+//----------------------------------------------//
+//            Alignment Layers                  //
+//----------------------------------------------//
+//--- STATION LAYER ---//
+export const label_stationp = new LabelClass({
+  symbol: new LabelSymbol3D({
+    symbolLayers: [
+      new TextSymbol3DLayer({
+        material: { color: "#d4ff33" },
+        size: 15,
+        halo: { color: "black", size: 0.5 },
+      }),
+    ],
+    verticalOffset: {
+      screenLength: 100,
+      maxWorldLength: 700,
+      minWorldLength: 80,
+    },
+
+    callout: {
+      type: "line",
+      color: [128, 128, 128, 0.5],
+      size: 0.2,
+      border: { color: "grey" },
+    },
+  }),
+  labelPlacement: "above-center",
+  labelExpressionInfo: { expression: "$feature.Station" },
+});
+
+//--- CHAINAGE LAYER ---//
+export const label_chainage = new LabelClass({
+  labelExpressionInfo: { expression: "$feature.KmSpot" },
+  symbol: {
+    type: "text",
+    color: [85, 255, 0],
+    haloColor: "black",
+    haloSize: 0.5,
+    font: { size: 15, weight: "bold" },
+  },
+});
+
+export const chainage_renderer = new SimpleRenderer({
+  symbol: new SimpleMarkerSymbol({
+    size: 5,
+    color: [255, 255, 255, 0.9],
+    outline: { width: 0.2, color: "black" },
+  }),
+});
+
+//--- STATION BOX LAYER ---//
+export const stationbox_renderer = new UniqueValueRenderer({
+  field: "Layer",
+  uniqueValueInfos: [
+    {
+      value: "00_Platform",
+      label: "Platform",
+      symbol: new SimpleFillSymbol({
+        color: [160, 160, 160],
+        style: "backward-diagonal",
+        outline: { width: 1, color: "black" },
+      }),
+    },
+    {
+      value: "00_Platform 10car",
+      label: "Platform 10car",
+      symbol: new SimpleFillSymbol({
+        color: [104, 104, 104],
+        style: "cross",
+        outline: { width: 1, color: "black", style: "short-dash" },
+      }),
+    },
+    {
+      value: "00_Station",
+      label: "Station Box",
+      symbol: new SimpleFillSymbol({
+        color: [0, 0, 0, 0],
+        outline: { width: 2, color: [115, 0, 0] },
+      }),
+    },
+  ],
+});
+
+//--- PROW LAYER ---//
+export const prow_renderer = new SimpleRenderer({
+  symbol: new SimpleLineSymbol({ color: "#ff0000", width: "2px" }),
+});
+
+//----------------------------------------------//
+//          Environment Monitoring Layers       //
+//----------------------------------------------//
 export type TypeFieldType = "number" | "string";
 export type StatusTypenamesType = "No Data" | "Normal" | "Exceeded";
 
-export type StatusStateType = "exceeded" | "normal" | "nodata";
-export const monitoringCategoryLabels = [
-  "Noise",
-  "Vibration",
-  "Air Quality",
-  "Soil Water",
-  "Groundwater",
-  "Surface Water",
-];
+export type StatusStateType =
+  | "exceeded"
+  | "normal"
+  | "nodata"
+  | "delayed"
+  | "ongoing";
 
-export const monitoringStatusValues = [1, 2, 3, 4, 5, 6];
-export const monitoringStatusColor = ["#FF0000", "#000000", "#666363"]; // exceeded, normal, nodata
 export const icons = [
   "https://EijiGorilla.github.io/Symbols/Noise_Logo.png",
   "https://EijiGorilla.github.io/Symbols/Vibration_Logo.png",
@@ -29,35 +142,102 @@ export const icons = [
   "https://EijiGorilla.github.io/Symbols/Water_drop.png",
 ];
 
-export const monitoringTypes = monitoringCategoryLabels.map(
-  (label: any, index: any) => {
-    return Object.assign({
-      category: label,
-      value: monitoringStatusValues[index],
-      icon: icons[index],
-      color: monitoringStatusColor[index],
-    });
-  },
-);
+export const types_q = [
+  { value: 1, category: "Noise", icon: icons[0] },
+  { value: 2, category: "Vibration", icon: icons[1] },
+  { value: 3, category: "Air Quality", icon: icons[2] },
+  { value: 4, category: "Soil Water", icon: icons[3] },
+  { value: 5, category: "Groundwater", icon: icons[4] },
+  { value: 6, category: "Surface Water", icon: icons[5] },
+];
 
-export const statusLabels = ["nodata", "normal", "exceeded"];
-export const statusValues = [1, 2, 3];
-export const statusArray = statusLabels.map((status: any, index: any) => {
-  return Object.assign({
-    status: status,
-    value: statusValues[index],
+export const status_icon = [
+  "https://EijiGorilla.github.io/Symbols/No_Data_textLogo.png",
+  "https://EijiGorilla.github.io/Symbols/DemolishComplete_v2.png",
+  "https://EijiGorilla.github.io/Symbols/3D_Web_Style/Warning_Symbol.svg",
+];
+
+export const status_q = [
+  { value: 1, status: "nodata", color: "#666363", icon: status_icon[0] },
+  { value: 2, status: "normal", color: "#000000", icon: status_icon[1] },
+  { value: 3, status: "exceeded", color: "#FF0000", icon: status_icon[2] },
+];
+
+const v_offset = { screenLength: 100, maxWorldLength: 500, minWorldLength: 10 };
+
+function getUniqueValueSymbol(name: string, color: any, sizeS: number) {
+  return new PointSymbol3D({
+    symbolLayers: [
+      new IconSymbol3DLayer({
+        resource: { href: name },
+        size: sizeS,
+        outline: { color: color, size: 2 },
+      }),
+    ],
+
+    verticalOffset: v_offset,
+
+    callout: new LineCallout3D({
+      color: [128, 128, 128, 0.8],
+      size: 0.2,
+      border: { color: "grey" },
+    }),
   });
+}
+
+const uniqueV = status_q.map((f: any) => {
+  return {
+    value: f.value,
+    label: f.category,
+    symbol: getUniqueValueSymbol(f.icon, "#D13470", f.value == 1 ? 60 : 20),
+  };
 });
 
+export const renderer = new UniqueValueRenderer({
+  field: status_f,
+  uniqueValueInfos: uniqueV,
+});
+
+export const labels = new LabelClass({
+  symbol: new LabelSymbol3D({
+    symbolLayers: [
+      new TextSymbol3DLayer({
+        material: { color: "black" },
+        size: 10,
+        halo: { color: [255, 255, 255, 0.7], size: 2 },
+      }),
+    ],
+  }),
+  labelPlacement: "above-center",
+  labelExpressionInfo: { expression: "DomainName($feature, 'Type')" },
+});
+
+export const popup = {
+  title: "<h5>{Type}</h5>",
+  lastEditInfoEnabled: false,
+  returnGeometry: true,
+  content: [
+    {
+      type: "fields",
+      fieldInfos: [
+        { fieldName: "StationNo", label: "Station No." },
+        { fieldName: "Location" },
+        { fieldName: "Status", label: "<h5>Status</h5>" },
+        { fieldName: "Remarks" },
+      ],
+    },
+  ],
+};
+
+//----------------------------------------------//
+//                     Layer List               //
+//----------------------------------------------//
 // Layter list
 export async function defineActions(event: any) {
   const { item } = event;
 
   if (item.layer.type !== "group") {
-    item.panel = {
-      content: "legend",
-      open: true,
-    };
+    item.panel = { content: "legend", open: true };
   }
 
   item.title === "Chainage" ? (item.visible = false) : (item.visible = true);
