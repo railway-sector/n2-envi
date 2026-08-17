@@ -3,12 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { monitorPointLayer } from "../layers";
 import * as am5 from "@amcharts/amcharts5";
 import * as am5xy from "@amcharts/amcharts5/xy";
-import {
-  makeQuery,
-  stackColumnChartData,
-  stackColumnChartRender,
-  thousands_separators,
-} from "../query";
+import { thousands_separators } from "../query";
 import { ArcgisScene } from "@arcgis/map-components/dist/components/arcgis-scene";
 import { status_f, status_q, type_f, types_q } from "../uniqueValues";
 import { useQuery } from "@tanstack/react-query";
@@ -16,6 +11,7 @@ import { legendSetter, rootSetter } from "../chartSetter";
 import type { ChartResponse } from "../interfaceKeys";
 import ChartStackColumnRender from "chart-stack-column-render";
 import ChartStackColumns from "chart-stack-column";
+import QueryExpressionLayers from "query-layers-expression";
 
 const Chart = () => {
   const [chartPanelwidth, setChartPanelwidth] = useState<any>();
@@ -24,21 +20,20 @@ const Chart = () => {
   const chartRef = useRef<unknown | any | undefined>({});
   const chartID = "monitoring-bar";
 
-  const queryc = makeQuery([undefined], [undefined]);
+  const q1 = new QueryExpressionLayers({});
 
   const { data } = useQuery<ChartResponse | any>({
     queryKey: [status_f, monitorPointLayer, type_f, types_q],
     queryFn: async () => {
       //--- chart data
-      const chartData = await stackColumnChartData({
-        colchart: new ChartStackColumns(),
-        qChart: queryc,
+      const chartData = await new ChartStackColumns({
+        where: q1,
         categoryTypes: types_q,
         categoryTypeField: type_f,
         layers: [monitorPointLayer],
         statusField: status_f,
         statusState: [1, 2, 3, 4],
-      });
+      }).chartDataStackColumns();
 
       let totale = 0;
       const arr = chartData[0].map(
@@ -90,6 +85,8 @@ const Chart = () => {
 
   useEffect(() => {
     const root = rootSetter({ chartID: chartID });
+    root.setThemes([]);
+
     const chart = root.container.children.push(
       am5xy.XYChart.new(root, {
         panX: false,
@@ -122,15 +119,14 @@ const Chart = () => {
     legendRef.current = legend;
 
     //--- chart renderer
-    stackColumnChartRender({
-      render: new ChartStackColumnRender(),
+    new ChartStackColumnRender({
       revit: false,
       layers: [monitorPointLayer],
       root,
       chart,
       data: chartData,
       buildingLayer: undefined,
-      qChart: queryc,
+      where: q1,
       chartCategoryTypes: types_q,
       chartCategoryTypeField: type_f,
       statusTypename: ["Exceeded", "Normal"],
@@ -148,9 +144,7 @@ const Chart = () => {
       chartPaddingRightIconLabel,
       legend,
       updateChartPanelwidth: setChartPanelwidth,
-    });
-
-    chart.appear(1000, 100);
+    }).chartRendererColumn();
 
     return () => {
       root.dispose();
